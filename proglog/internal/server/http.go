@@ -23,6 +23,7 @@ func StartServer() {
 			errorJson := Error{Message: "Body is either empty or unparsable", ErrorCode: http.StatusBadRequest}
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(errorJson)
+			return
 		}
 
 		offset, err := Logger.Log.Append(requestJson.Record)
@@ -31,6 +32,7 @@ func StartServer() {
 			errorJson := Error{Message: "Unable to commit log", ErrorCode: http.StatusInternalServerError}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(errorJson)
+			return
 		}
 
 		var responseJson ProduceResponse
@@ -41,6 +43,7 @@ func StartServer() {
 			errorJson := Error{Message: "Unable to generate response", ErrorCode: http.StatusInternalServerError}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(errorJson)
+			return
 		}
 	})
 
@@ -52,6 +55,7 @@ func StartServer() {
 			errorJson := Error{Message: "Body is either empty or unparsable", ErrorCode: http.StatusBadRequest}
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(errorJson)
+			return
 		}
 
 		record, err := Logger.Log.Read(requestJson.Offset)
@@ -60,6 +64,7 @@ func StartServer() {
 			errorJson := Error{Message: "Offset not found", ErrorCode: http.StatusNotFound}
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(errorJson)
+			return
 		}
 
 		var responseJson ConsumeResponse
@@ -70,6 +75,7 @@ func StartServer() {
 			errorJson := Error{Message: "Unable to generate response", ErrorCode: http.StatusInternalServerError}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(errorJson)
+			return
 		}
 	})
 
