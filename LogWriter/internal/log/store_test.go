@@ -48,4 +48,9 @@ func TestStore(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, len(message), numBytesRead)
 	require.Equal(t, message, readMessage)
+
+	//Test close
+	err = s.Close()
+	require.NoError(t, err)
+
 }
