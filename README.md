@@ -5,3 +5,4 @@ Implementations of the things that i learnt from the book "[Distributed Services
 # Resources
 - [The Log](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying)
 - [Building a distributed log storage](https://bravenewgeek.com/building-a-distributed-log-from-scratch-part-1-storage-mechanics/)
+- [Memory mapped file operations](https://blog.labix.org/2010/11/28/removing-seatbelts-with-the-go-language-for-mmap-support)
