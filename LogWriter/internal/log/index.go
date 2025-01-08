@@ -41,6 +41,10 @@ func newIndex(f *os.File, c Config) (*index, error) {
 	return idx, nil
 }
 
+func (i *index) Name() string {
+	return i.file.Name()
+}
+
 func (i *index) Close() error {
 	if err := i.mmap.Sync(gommap.MS_SYNC); err != nil {
 		return err
