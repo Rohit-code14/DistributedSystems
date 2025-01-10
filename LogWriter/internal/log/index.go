@@ -8,7 +8,7 @@ import (
 )
 
 var offsetWidth uint64 = 4
-var positionWidth uint64 = 4
+var positionWidth uint64 = 8
 var entireWidth uint64 = offsetWidth + positionWidth
 
 type index struct {
@@ -55,7 +55,7 @@ func (i *index) Close() error {
 	if err := i.file.Truncate(int64(i.size)); err != nil {
 		return err
 	}
-	return nil
+	return i.file.Close()
 }
 
 func (i *index) Read(offset int64) (out uint32, pos uint64, err error) {
