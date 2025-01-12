@@ -17,7 +17,7 @@ func TestStore(t *testing.T) {
 	require.NoError(t, err)
 	defer os.Remove(f.Name())
 
-	s, err := NewStore(f)
+	s, err := newStore(f)
 	require.NoError(t, err)
 
 	var currentPos uint64 = 0

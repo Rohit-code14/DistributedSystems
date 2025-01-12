@@ -11,14 +11,14 @@ var enc = binary.BigEndian
 
 const lenWidth = 8
 
-type Store struct {
+type store struct {
 	*os.File
 	mu   sync.Mutex
 	buf  *bufio.Writer
 	size uint64
 }
 
-func NewStore(f *os.File) (*Store, error) {
+func newStore(f *os.File) (*store, error) {
 	fi, err := os.Stat(f.Name())
 
 	if err != nil {
@@ -26,14 +26,14 @@ func NewStore(f *os.File) (*Store, error) {
 	}
 
 	size := uint64(fi.Size())
-	return &Store{
+	return &store{
 		File: f,
 		size: size,
 		buf:  bufio.NewWriter(f),
 	}, nil
 }
 
-func (s *Store) Append(message []byte) (n uint64, pos uint64, err error) {
+func (s *store) Append(message []byte) (n uint64, pos uint64, err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	pos = s.size
@@ -50,7 +50,7 @@ func (s *Store) Append(message []byte) (n uint64, pos uint64, err error) {
 	return uint64(w), pos, nil
 }
 
-func (s *Store) Read(pos uint64) ([]byte, error) {
+func (s *store) Read(pos uint64) ([]byte, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if err := s.buf.Flush(); err != nil {
@@ -68,7 +68,7 @@ func (s *Store) Read(pos uint64) ([]byte, error) {
 	return message, nil
 }
 
-func (s *Store) ReadAt(message []byte, offset int64) (int, error) {
+func (s *store) ReadAt(message []byte, offset int64) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if err := s.buf.Flush(); err != nil {
@@ -77,7 +77,7 @@ func (s *Store) ReadAt(message []byte, offset int64) (int, error) {
 	return s.File.ReadAt(message, offset)
 }
 
-func (s *Store) Close() error {
+func (s *store) Close() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if err := s.buf.Flush(); err != nil {
