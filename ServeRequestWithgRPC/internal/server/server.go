@@ -7,6 +7,11 @@ import (
 	"google.golang.org/grpc"
 )
 
+type CommitLog interface {
+	Append(*api.Record) (uint64, error)
+	Read(uint64) (*api.Record, error)
+}
+
 type Config struct {
 	CommitLog CommitLog
 }
@@ -14,11 +19,6 @@ type Config struct {
 type grpcServer struct {
 	*Config
 	api.UnimplementedLogServer
-}
-
-type CommitLog interface {
-	Append(*api.Record) (uint64, error)
-	Read(uint64) (*api.Record, error)
 }
 
 func newGrpcServer(config *Config) (srv *grpcServer, err error) {

@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 func TestServer(t *testing.T) {
@@ -20,6 +22,7 @@ func TestServer(t *testing.T) {
 		config *Config,
 	){
 		"produce/consume a message to/from the log succeeeds": testProduceConsume,
+		"produce/consume stream succeeds":                     testProduceConsumeStream,
 	} {
 		t.Run(scenario, func(t *testing.T) {
 			client, config, teardown := setupTest(t, nil)
@@ -37,8 +40,8 @@ func setupTest(t *testing.T, fn func(*Config)) (
 	t.Helper()
 	l, err := net.Listen("tcp", "127.0.0.1:3000")
 	require.NoError(t, err)
-	clientOptions := []grpc.DialOption{grpc.WithInsecure()}
-	cc, err := grpc.Dial(l.Addr().String(), clientOptions...)
+	clientOptions := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	cc, err := grpc.NewClient(l.Addr().String(), clientOptions...)
 	require.NoError(t, err)
 	dir, err := os.MkdirTemp("", "server-test")
 	require.NoError(t, err)
@@ -82,4 +85,32 @@ func testProduceConsume(t *testing.T, client api.LogClient, config *Config) {
 	require.NoError(t, err)
 	require.Equal(t, want.Value, consume.Record.Value)
 	require.Equal(t, want.Offset, consume.Record.Offset)
+}
+
+func testProduceConsumeStream(t *testing.T, client api.LogClient, config *Config) {
+	ctx := context.Background()
+	want := &api.Record{
+		Value: []byte("Test Message"),
+	}
+
+	produce, err := client.Produce(
+		ctx, &api.ProduceRequest{
+			Record: want,
+		},
+	)
+
+	require.NoError(t, err)
+
+	consume, err := client.Consume(ctx, &api.ConsumeRequest{
+		Offset: produce.Offset + 1,
+	})
+
+	if consume != nil {
+		t.Fatal("Consumer exception")
+	}
+
+	errorCode := status.Code(err)
+	if errorCode != status.Code(api.ErrOffsetOutOfRange{}.GRPCStatus().Err()) {
+		t.Fatalf("Error - %v", errorCode)
+	}
 }
